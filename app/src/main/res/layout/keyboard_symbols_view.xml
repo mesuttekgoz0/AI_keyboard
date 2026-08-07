@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- keyboard_symbols_view.xml — Sayılar ve Semboller (0 Dead-Zone touch targets) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/symbols_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#1B1C1E">
+
+    <!-- Araç Çubuğu — AI butonu -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:orientation="horizontal"
+        android:background="#1B1C1E"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:gravity="center_vertical|end">
+
+        <Button
+            android:id="@+id/sym_btn_ai"
+            android:layout_width="40dp"
+            android:layout_height="36dp"
+            android:text="AI"
+            android:textAllCaps="false"
+            android:background="@drawable/bg_ai_button"
+            android:textColor="#1B1C1E"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:padding="0dp"
+            android:elevation="2dp" />
+    </LinearLayout>
+
+    <!-- Satır 1: 1 2 3 4 5 6 7 8 9 0 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="3dp"
+        android:paddingEnd="3dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="2dp">
+
+        <Button android:id="@+id/sym_1" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="1" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_2" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="2" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_3" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="3" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_4" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="4" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_5" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="5" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_6" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="6" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_7" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="7" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_8" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="8" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_9" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="9" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_0" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="0" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+
+    </LinearLayout>
+
+    <!-- Satır 2: ! @ # $ % ^ &amp; * - + -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="3dp"
+        android:paddingEnd="3dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp">
+
+        <Button android:id="@+id/sym_excl"  android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="!"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_at"    android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="@"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_hash"  android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="#"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_dol"   android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="$"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_pct"   android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="%"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_amp"   android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="&amp;" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_star"  android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="*"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_lpar"  android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="("  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_rpar"  android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text=")"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_under" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="_"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+
+    </LinearLayout>
+
+    <!-- Satır 3: =< - + = / : ; ' " ⌫ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="3dp"
+        android:paddingEnd="3dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp">
+
+        <Button
+            android:id="@+id/sym_more"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1.4"
+            android:text="=&lt;"
+            android:textAllCaps="false"
+            android:textColor="#BDC1C6"
+            android:textSize="11sp"
+            android:background="@drawable/bg_key_special"
+            android:layout_margin="0dp"
+            android:padding="0dp" />
+
+        <Button android:id="@+id/sym_minus"  android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="-"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_plus"   android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="+"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_eq"     android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="="  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_slash"  android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="/"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_colon"  android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text=":"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_semi"   android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text=";"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_apos"   android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="'"  android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+        <Button android:id="@+id/sym_quot"   android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="&quot;" android:textAllCaps="false" android:textColor="#E8EAED" android:textSize="17sp" android:background="@drawable/bg_key_letter" android:layout_margin="0dp" android:padding="0dp" />
+
+        <Button
+            android:id="@+id/sym_delete"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1.4"
+            android:text="⌫"
+            android:textAllCaps="false"
+            android:textColor="#BDC1C6"
+            android:textSize="22sp"
+            android:background="@drawable/bg_key_special"
+            android:layout_margin="0dp"
+            android:padding="0dp" />
+
+    </LinearLayout>
+
+    <!-- Satır 4: ABC | SPACE | ↵ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="3dp"
+        android:paddingEnd="3dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="4dp">
+
+        <Button
+            android:id="@+id/sym_abc"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1.5"
+            android:text="ABC"
+            android:textAllCaps="false"
+            android:textColor="#BDC1C6"
+            android:textSize="13sp"
+            android:background="@drawable/bg_key_special"
+            android:layout_margin="0dp"
+            android:padding="0dp" />
+
+        <Button
+            android:id="@+id/sym_comma"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="0.9"
+            android:text=","
+            android:textAllCaps="false"
+            android:textColor="#E8EAED"
+            android:textSize="18sp"
+            android:background="@drawable/bg_key_letter"
+            android:layout_margin="0dp"
+            android:padding="0dp" />
+
+        <Button
+            android:id="@+id/sym_space"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="3.5"
+            android:text="TR"
+            android:textAllCaps="false"
+            android:textColor="#9E9E9E"
+            android:textSize="13sp"
+            android:background="@drawable/bg_key_letter"
+            android:layout_margin="0dp"
+            android:padding="0dp" />
+
+        <Button
+            android:id="@+id/sym_period"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="0.9"
+            android:text="."
+            android:textAllCaps="false"
+            android:textColor="#E8EAED"
+            android:textSize="18sp"
+            android:background="@drawable/bg_key_letter"
+            android:layout_margin="0dp"
+            android:padding="0dp" />
+
+        <Button
+            android:id="@+id/sym_enter"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1.5"
+            android:text="↵"
+            android:textAllCaps="false"
+            android:textColor="#BDC1C6"
+            android:textSize="22sp"
+            android:background="@drawable/bg_key_special"
+            android:layout_margin="0dp"
+            android:padding="0dp" />
+
+    </LinearLayout>
+
+    <!-- Navigasyon çubuğu için dinamik dolgu -->
+    <View
+        android:id="@+id/sym_nav_bar_spacer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#1B1C1E" />
+
+</LinearLayout>
