@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <!-- Fn badge -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fn"
+        android:textColor="#1B1C1E"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:background="@drawable/bg_key_shift_active"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:layout_marginEnd="4dp" />
+
+    <!-- Harf badge -->
+    <TextView
+        android:id="@+id/tv_shortcut_key"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:gravity="center"
+        android:textColor="#E8EAED"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:background="@drawable/bg_key_special"
+        android:layout_marginEnd="10dp" />
+
+    <!-- Ok işareti -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="→"
+        android:textColor="#6E6E73"
+        android:textSize="12sp"
+        android:layout_marginEnd="10dp" />
+
+    <!-- Aksiyon açıklaması -->
+    <TextView
+        android:id="@+id/tv_shortcut_action"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="#E8EAED"
+        android:textSize="13sp"
+        android:ellipsize="end"
+        android:maxLines="1" />
+
+    <!-- Sil butonu -->
+    <ImageButton
+        android:id="@+id/btn_delete_shortcut"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_delete"
+        android:tint="#CF6679"
+        android:contentDescription="Sil" />
+
+</LinearLayout>

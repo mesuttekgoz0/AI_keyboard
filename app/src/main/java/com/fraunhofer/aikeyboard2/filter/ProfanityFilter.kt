@@ -54,8 +54,8 @@ object ProfanityFilter {
         }
     }
 
-    /** Kelimeyi sansürler. */
-    fun censor(@Suppress("UNUSED_PARAMETER") word: String): String = "***"
+    /** Kelimeyi siler (boş string döner — sansürleme yerine tamamen kaldırır). */
+    fun censor(@Suppress("UNUSED_PARAMETER") word: String): String = ""
 
     /**
      * Türkçe karakterleri Latin eşdeğerleriyle değiştirir.

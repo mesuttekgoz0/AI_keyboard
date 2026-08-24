@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_card">
+
+    <!-- Başlık -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="⚡ Yeni Kısayol Ekle"
+        android:textColor="#E8EAED"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Fn + Harf Seçimi -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kısayol Tuşu"
+        android:textColor="#9E9E9E"
+        android:textSize="12sp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="20dp">
+
+        <!-- Fn badge (statik) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Fn"
+            android:gravity="center"
+            android:textColor="#1B1C1E"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_key_shift_active"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" + "
+            android:textColor="#6E6E73"
+            android:textSize="16sp" />
+
+        <!-- Harf Spinner -->
+        <Spinner
+            android:id="@+id/spinner_key"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_input_field"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+    </LinearLayout>
+
+    <!-- Aksiyon Seçimi -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aksiyon"
+        android:textColor="#9E9E9E"
+        android:textSize="12sp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Radio Group -->
+    <RadioGroup
+        android:id="@+id/rg_action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/rb_select_all"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="📋  Tümünü Seç"
+            android:textColor="#E8EAED"
+            android:textSize="14sp"
+            android:buttonTint="#8AB4F8"
+            android:paddingStart="8dp" />
+
+        <RadioButton
+            android:id="@+id/rb_copy"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="📄  Kopyala"
+            android:textColor="#E8EAED"
+            android:textSize="14sp"
+            android:buttonTint="#8AB4F8"
+            android:paddingStart="8dp" />
+
+        <RadioButton
+            android:id="@+id/rb_paste"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="📌  Yapıştır"
+            android:textColor="#E8EAED"
+            android:textSize="14sp"
+            android:buttonTint="#8AB4F8"
+            android:paddingStart="8dp" />
+
+        <RadioButton
+            android:id="@+id/rb_type_text"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="✏️  Metin Yaz"
+            android:textColor="#E8EAED"
+            android:textSize="14sp"
+            android:buttonTint="#8AB4F8"
+            android:paddingStart="8dp" />
+    </RadioGroup>
+
+    <!-- Metin Yaz giriş alanı (sadece Metin Yaz seçilince görünür) -->
+    <EditText
+        android:id="@+id/et_type_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Otomatik yazılacak metin..."
+        android:textColor="#E8EAED"
+        android:textSize="14sp"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:maxLines="4"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:background="@drawable/bg_input_field"
+        android:visibility="gone"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Butonlar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:text="İptal"
+            android:textAllCaps="false"
+            android:textColor="#9E9E9E"
+            android:textSize="14sp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:backgroundTint="#2A2B2E"
+            android:layout_marginEnd="12dp" />
+
+        <Button
+            android:id="@+id/btn_save_shortcut"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:text="Kaydet"
+            android:textAllCaps="false"
+            android:textColor="#1B1C1E"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:backgroundTint="#8AB4F8" />
+    </LinearLayout>
+
+</LinearLayout>

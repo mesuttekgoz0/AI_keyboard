@@ -7,6 +7,7 @@ import java.io.InputStreamReader
 import java.util.Locale
 import kotlin.math.min
 
+
 /**
  * Performanslı Türkçe Otomatik Düzeltme ve Öneri Motoru.
  *

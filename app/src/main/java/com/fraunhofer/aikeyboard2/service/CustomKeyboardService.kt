@@ -70,6 +70,11 @@ class CustomKeyboardService : InputMethodService() {
     private var btnSuggest2: Button? = null
     private var btnSuggest3: Button? = null
 
+    // Engellenen Kelime Bildirimi
+    private var toolbarBlocked: View? = null
+    private var tvBlockedMessage: TextView? = null
+    private val blockedHandler = Handler(Looper.getMainLooper())
+
     // Cached Drawables
     private lateinit var drawableSpecial: Drawable
     private lateinit var drawableShiftActive: Drawable
@@ -161,6 +166,7 @@ class CustomKeyboardService : InputMethodService() {
     override fun onFinishInput() {
         super.onFinishInput()
         deleteHandler.removeCallbacks(deleteRunnable)
+        blockedHandler.removeCallbacksAndMessages(null)
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -201,6 +207,10 @@ class CustomKeyboardService : InputMethodService() {
         btnSuggest1        = view.findViewById(R.id.btn_suggest_1)
         btnSuggest2        = view.findViewById(R.id.btn_suggest_2)
         btnSuggest3        = view.findViewById(R.id.btn_suggest_3)
+
+        // Engellenen Kelime Bildirimi
+        toolbarBlocked   = view.findViewById(R.id.toolbar_blocked)
+        tvBlockedMessage = view.findViewById(R.id.tv_blocked_message)
 
         // Öneri Tuşları Dokunmaları
         bindInstantTouch(btnSuggest1) { commitSuggestion(btnSuggest1?.text.toString()) }
@@ -532,10 +542,21 @@ class CustomKeyboardService : InputMethodService() {
 
     private fun handleCharacter(text: String) {
         if (isFnActive) {
+            val key = text[0].lowercaseChar()
+            val shortcut = com.fraunhofer.aikeyboard2.data.ShortcutRepository(this).get(key)
             currentInputConnection?.let { ic ->
-                when (text[0].uppercaseChar()) {
-                    'A' -> ic.performContextMenuAction(android.R.id.selectAll)
-                    'S' -> deleteLastSentence(ic)
+                when (shortcut?.action) {
+                    com.fraunhofer.aikeyboard2.data.ShortcutRepository.ActionType.SELECT_ALL ->
+                        ic.performContextMenuAction(android.R.id.selectAll)
+                    com.fraunhofer.aikeyboard2.data.ShortcutRepository.ActionType.COPY ->
+                        ic.performContextMenuAction(android.R.id.copy)
+                    com.fraunhofer.aikeyboard2.data.ShortcutRepository.ActionType.PASTE ->
+                        ic.performContextMenuAction(android.R.id.paste)
+                    com.fraunhofer.aikeyboard2.data.ShortcutRepository.ActionType.TYPE_TEXT -> {
+                        val textToInsert = shortcut.text
+                        if (textToInsert.isNotEmpty()) ic.commitText(textToInsert, 1)
+                    }
+                    null -> { /* Tanımsız kısayol — yoksay */ }
                 }
             }
             isFnActive = false
@@ -561,18 +582,27 @@ class CustomKeyboardService : InputMethodService() {
 
         if (word.isNotEmpty()) {
             if (ProfanityFilter.isProfane(word)) {
+                // Kelimeyi tamamen sil — boşluk bırak, *** koyma
                 ic.deleteSurroundingText(word.length, 0)
-                ic.commitText(ProfanityFilter.censor(word), 1)
+                // Sonrasındaki boşluk/noktalama da commit edilmesin (sadece kelime silindi)
+                wordBuffer.clear()
+                updateSuggestions()
+                showBlockedBanner(word)
+                if (isFnActive) { isFnActive = false; updateFnVisual() }
+                return
             } else {
                 // Otomatik Düzeltme (Auto-Correction):
                 // Eğer ortadaki öneri (btnSuggest2) farklı bir kelime ise ve gösteriliyorsa otomatik tamamla
-                val autoCorrectCandidate = btnSuggest2?.text?.toString()?.trim() ?: ""
-                if (autoCorrectCandidate.isNotEmpty() &&
-                    !autoCorrectCandidate.equals(word, ignoreCase = true) &&
-                    toolbarSuggestions?.visibility == View.VISIBLE) {
+                val autocorrectEnabled = prefs.getBoolean("autocorrect_enabled", true)
+                if (autocorrectEnabled) {
+                    val autoCorrectCandidate = btnSuggest2?.text?.toString()?.trim() ?: ""
+                    if (autoCorrectCandidate.isNotEmpty() &&
+                        !autoCorrectCandidate.equals(word, ignoreCase = true) &&
+                        toolbarSuggestions?.visibility == View.VISIBLE) {
 
-                    ic.deleteSurroundingText(word.length, 0)
-                    ic.commitText(autoCorrectCandidate, 1)
+                        ic.deleteSurroundingText(word.length, 0)
+                        ic.commitText(autoCorrectCandidate, 1)
+                    }
                 }
             }
         }
@@ -582,6 +612,28 @@ class CustomKeyboardService : InputMethodService() {
         updateSuggestions()
 
         if (isFnActive) { isFnActive = false; updateFnVisual() }
+    }
+
+    /**
+     * Klavye toolbar'ında 2 saniyelik engelleme bildirimi gösterir.
+     * Toast değil — klavye içinde düz bir banner.
+     */
+    private fun showBlockedBanner(blockedWord: String) {
+        val banner = toolbarBlocked ?: return
+        val tv     = tvBlockedMessage ?: return
+
+        // Önceki zamanlayıcıyı iptal et (art arda birden fazla kelime engellenirse)
+        blockedHandler.removeCallbacksAndMessages(null)
+
+        tv.text = "🚫  \"$blockedWord\" silindi"
+        toolbarDefault?.visibility     = View.GONE
+        toolbarSuggestions?.visibility = View.GONE
+        banner.visibility              = View.VISIBLE
+
+        blockedHandler.postDelayed({
+            banner.visibility          = View.GONE
+            updateSuggestions() // öneri şeridini ya da default toolbar'ı geri göster
+        }, 2000L)
     }
 
     private fun handleEnter() {
