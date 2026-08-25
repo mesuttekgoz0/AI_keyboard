@@ -26,9 +26,11 @@ object AutoCorrectEngine {
     }
 
     private val root = TrieNode()
-    private val allWords = ArrayList<Pair<String, String>>(1000) // (raw, normalized)
     private var isLoaded = false
     private val trLocale = Locale("tr", "TR")
+
+    /** İlk harfe göre gruplanmış (raw, normalized) kelime listesi — typo aramasını 76k kelime yerine tek harf grubuna daraltır. */
+    private val wordsByFirstChar = HashMap<Char, ArrayList<Pair<String, String>>>(32)
 
     /**
      * Sözlük dosyası ve Kullanıcı Özel Sözlüğünü tek seferde Trie yapısına yükler.
@@ -74,7 +76,10 @@ object AutoCorrectEngine {
         curr.isWord = true
         curr.word = word
         curr.frequency = freq
-        allWords.add(word to normalize(word))
+
+        val normalized = normalize(word)
+        val bucketKey = normalized.firstOrNull() ?: return
+        wordsByFirstChar.getOrPut(bucketKey) { ArrayList() }.add(word to normalized)
     }
 
     /**
@@ -117,14 +122,17 @@ object AutoCorrectEngine {
     /**
      * Trie üzerinde ön ek araması yapar.
      */
+    /** Yaygın (kısa) ön eklerde tüm alt ağacı taramamak için üst sınır. */
+    private const val PREFIX_COLLECT_CAP = 150
+
     private fun findPrefixMatches(prefix: String, limit: Int): List<String> {
         var curr = root
         for (c in prefix) {
             curr = curr.children[c] ?: return emptyList()
         }
 
-        val matches = ArrayList<Pair<String, Int>>()
-        collectAll(curr, matches)
+        val matches = ArrayList<Pair<String, Int>>(PREFIX_COLLECT_CAP)
+        collectAll(curr, matches, PREFIX_COLLECT_CAP)
 
         return matches
             .sortedByDescending { it.second }
@@ -132,12 +140,15 @@ object AutoCorrectEngine {
             .take(limit)
     }
 
-    private fun collectAll(node: TrieNode, list: MutableList<Pair<String, Int>>) {
+    /** Alt ağacı gezer, `cap` kadar sonuç bulunca erken durur (tam sözlük taramasını önler). */
+    private fun collectAll(node: TrieNode, list: MutableList<Pair<String, Int>>, cap: Int) {
+        if (list.size >= cap) return
         if (node.isWord) {
             list.add(node.word to node.frequency)
         }
         for (child in node.children.values) {
-            collectAll(child, list)
+            if (list.size >= cap) return
+            collectAll(child, list, cap)
         }
     }
 
@@ -145,10 +156,12 @@ object AutoCorrectEngine {
      * Levenshtein mesafesi ile en yakın kelimeleri bulur.
      */
     private fun findTypoMatches(rawInput: String, normInput: String, limit: Int): List<String> {
+        if (normInput.isEmpty()) return emptyList()
         val maxDist = if (rawInput.length <= 4) 1 else 2
+        val bucket = wordsByFirstChar[normInput[0]] ?: return emptyList()
         val candidates = ArrayList<Pair<String, Int>>()
 
-        for ((word, normWord) in allWords) {
+        for ((word, normWord) in bucket) {
             if (kotlin.math.abs(normInput.length - normWord.length) > maxDist) continue
 
             val dist = levenshtein(normInput, normWord)

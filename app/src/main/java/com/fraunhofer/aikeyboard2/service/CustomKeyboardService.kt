@@ -6,19 +6,23 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.inputmethodservice.InputMethodService
+import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputConnection
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.fraunhofer.aikeyboard2.R
 import com.fraunhofer.aikeyboard2.autocomplete.AutoCorrectEngine
 import com.fraunhofer.aikeyboard2.filter.ProfanityFilter
+import java.util.concurrent.Executors
 
 /**
  * GBoard Birebir Tema, Ultra-Düşük Gecikme (0ms Latency), Dinamik Boyutlandırma
@@ -58,6 +62,15 @@ class CustomKeyboardService : InputMethodService() {
     private var currentKeyHeightDp = DEFAULT_KEY_HEIGHT_DP
     private lateinit var prefs: SharedPreferences
 
+    // Tuş sesi / titreşimi
+    private lateinit var audioManager: AudioManager
+
+    // Çift boşlukla nokta
+    private var lastSpaceCommitTime = 0L
+
+    // Aktif giriş alanı bilgisi (şifre alanlarında otomatik büyük harfi engellemek için)
+    private var currentEditorInfo: EditorInfo? = null
+
     // View Referansları
     private lateinit var btnShift: Button
     private lateinit var btnFn: Button
@@ -78,6 +91,18 @@ class CustomKeyboardService : InputMethodService() {
     // Cached Drawables
     private lateinit var drawableSpecial: Drawable
     private lateinit var drawableShiftActive: Drawable
+
+    // Öneri hesaplama — ana thread'i (UI) kilitlememek için ayrı thread'de çalışır.
+    // 76k+ kelimelik sözlükte Levenshtein taraması main thread'de yapılırsa klavye donar.
+    private val suggestionExecutor = Executors.newSingleThreadExecutor()
+    private val suggestionHandler = Handler(Looper.getMainLooper())
+    private var suggestionRequestId = 0
+    // Şu an gösterilen önerinin hangi kelime için hesaplandığı — otomatik düzeltmenin
+    // eski/tamamlanmamış bir hesaplamayı yanlışlıkla kullanmasını engeller.
+    private var suggestionWordContext: String = ""
+
+    // Boyutlandırma sırasında tekrar tekrar findViewById çağırmamak için önbelleklenen tuş listesi
+    private var resizableButtons: List<View> = emptyList()
 
     // Uzun basış silme Handler
     private val deleteHandler = Handler(Looper.getMainLooper())
@@ -147,6 +172,7 @@ class CustomKeyboardService : InputMethodService() {
         currentKeyHeightDp = prefs.getInt("key_height_dp", DEFAULT_KEY_HEIGHT_DP)
         drawableSpecial     = resources.getDrawable(R.drawable.bg_key_special, null)
         drawableShiftActive = resources.getDrawable(R.drawable.bg_key_shift_active, null)
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         ProfanityFilter.loadFromRepository(this)
         AutoCorrectEngine.loadDictionary(this)
     }
@@ -155,18 +181,42 @@ class CustomKeyboardService : InputMethodService() {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        currentEditorInfo = info
         ProfanityFilter.loadFromRepository(this)
         AutoCorrectEngine.loadDictionary(this)
         if (isFnActive) { isFnActive = false; updateFnVisual() }
-        if (shiftMode != 0) { shiftMode = 0; updateShiftVisual() }
         wordBuffer.clear()
+        lastSpaceCommitTime = 0L
+
+        // Boş bir alana giriliyorsa (şifre alanı değilse) ilk harfi otomatik büyük başlat
+        val startsEmpty = currentInputConnection?.getTextBeforeCursor(1, 0).isNullOrEmpty()
+        shiftMode = if (prefs.getBoolean("auto_capitalize_enabled", true) && startsEmpty && !isPasswordField(info)) 1 else 0
+        updateShiftVisual()
+
         updateSuggestions()
+    }
+
+    private fun isPasswordField(info: EditorInfo?): Boolean {
+        val inputType = info?.inputType ?: return false
+        val cls = inputType and EditorInfo.TYPE_MASK_CLASS
+        val variation = inputType and EditorInfo.TYPE_MASK_VARIATION
+        return cls == EditorInfo.TYPE_CLASS_TEXT && (
+            variation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD ||
+            variation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
+            variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD
+        )
     }
 
     override fun onFinishInput() {
         super.onFinishInput()
         deleteHandler.removeCallbacks(deleteRunnable)
         blockedHandler.removeCallbacksAndMessages(null)
+        suggestionHandler.removeCallbacksAndMessages(null)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        suggestionExecutor.shutdownNow()
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -179,6 +229,7 @@ class CustomKeyboardService : InputMethodService() {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     view.isPressed = true
+                    playKeyFeedback(view)
                     action()
                     true
                 }
@@ -188,6 +239,16 @@ class CustomKeyboardService : InputMethodService() {
                 }
                 else -> false
             }
+        }
+    }
+
+    /** Ayarlarda açıksa tuşa basışta kısa ses ve/veya titreşim verir (GBoard'daki gibi). */
+    private fun playKeyFeedback(view: View) {
+        if (prefs.getBoolean("key_sound_enabled", false)) {
+            audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD)
+        }
+        if (prefs.getBoolean("key_vibration_enabled", true)) {
+            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
         }
     }
 
@@ -280,11 +341,12 @@ class CustomKeyboardService : InputMethodService() {
         }
         bindInstantTouch(view.findViewById(R.id.btn_ai)) { triggerAI() }
 
-        // Boyutlandırma Menüsü Kontrolleri
-        setupSizeControlPanel(view)
+        // Boyutlandırılabilir tuşları önbelleğe al, sürükleyerek yeniden boyutlandırmayı bağla
+        resizableButtons = collectResizableButtons(view)
+        setupResizeDrag(view, resizableButtons)
 
         // Mevcut klavye yüksekliğini uygula
-        applyKeyHeight(view, currentKeyHeightDp)
+        applyKeyHeight(resizableButtons, currentKeyHeightDp)
 
         applyNavBarPadding(view, view.findViewById(R.id.nav_bar_spacer))
         return view
@@ -314,7 +376,8 @@ class CustomKeyboardService : InputMethodService() {
         bindInstantTouch(view.findViewById(R.id.sym_enter))  { handleEnter() }
         bindInstantTouch(view.findViewById(R.id.sym_btn_ai)) { triggerAI() }
 
-        applyKeyHeight(view, currentKeyHeightDp)
+        resizableButtons = collectResizableButtons(view)
+        applyKeyHeight(resizableButtons, currentKeyHeightDp)
         applyNavBarPadding(view, view.findViewById(R.id.sym_nav_bar_spacer))
         return view
     }
@@ -325,32 +388,51 @@ class CustomKeyboardService : InputMethodService() {
 
     /**
      * Mevcut wordBuffer kelimesine göre 3 slotlu canlı önerileri günceller.
+     * Öneri hesaplaması (Trie + Levenshtein) arka plan thread'inde yapılır — ana thread'i
+     * bloklamaz, klavye dokunuşları/animasyonları donmaz.
      */
     private fun updateSuggestions() {
         val currentWord = wordBuffer.toString().trim()
-        if (currentWord.isNotEmpty()) {
-            val suggestions = AutoCorrectEngine.getSuggestions(currentWord, 3)
-            if (suggestions.isNotEmpty()) {
-                toolbarDefault?.visibility     = View.GONE
-                toolbarSuggestions?.visibility = View.VISIBLE
+        val requestId = ++suggestionRequestId
 
-                val s1 = suggestions.getOrNull(0) ?: ""
-                val s2 = suggestions.getOrNull(1) ?: currentWord
-                val s3 = suggestions.getOrNull(2) ?: ""
-
-                btnSuggest1?.text = s1
-                btnSuggest2?.text = s2
-                btnSuggest3?.text = s3
-
-                btnSuggest1?.visibility = if (s1.isNotEmpty()) View.VISIBLE else View.INVISIBLE
-                btnSuggest2?.visibility = View.VISIBLE
-                btnSuggest3?.visibility = if (s3.isNotEmpty()) View.VISIBLE else View.INVISIBLE
-                return
-            }
+        if (currentWord.isEmpty()) {
+            suggestionWordContext = ""
+            toolbarSuggestions?.visibility = View.GONE
+            toolbarDefault?.visibility     = View.VISIBLE
+            return
         }
 
-        toolbarSuggestions?.visibility = View.GONE
-        toolbarDefault?.visibility     = View.VISIBLE
+        suggestionExecutor.execute {
+            val suggestions = AutoCorrectEngine.getSuggestions(currentWord, 3)
+            suggestionHandler.post {
+                // Kullanıcı bu arada yazmaya devam ettiyse eski sonucu yoksay
+                if (requestId != suggestionRequestId) return@post
+                suggestionWordContext = currentWord
+                applySuggestions(suggestions, currentWord)
+            }
+        }
+    }
+
+    private fun applySuggestions(suggestions: List<String>, currentWord: String) {
+        if (suggestions.isNotEmpty()) {
+            toolbarDefault?.visibility     = View.GONE
+            toolbarSuggestions?.visibility = View.VISIBLE
+
+            val s1 = suggestions.getOrNull(0) ?: ""
+            val s2 = suggestions.getOrNull(1) ?: currentWord
+            val s3 = suggestions.getOrNull(2) ?: ""
+
+            btnSuggest1?.text = s1
+            btnSuggest2?.text = s2
+            btnSuggest3?.text = s3
+
+            btnSuggest1?.visibility = if (s1.isNotEmpty()) View.VISIBLE else View.INVISIBLE
+            btnSuggest2?.visibility = View.VISIBLE
+            btnSuggest3?.visibility = if (s3.isNotEmpty()) View.VISIBLE else View.INVISIBLE
+        } else {
+            toolbarSuggestions?.visibility = View.GONE
+            toolbarDefault?.visibility     = View.VISIBLE
+        }
     }
 
     /**
@@ -377,68 +459,85 @@ class CustomKeyboardService : InputMethodService() {
     // Klavye Boyutlandırma Mantığı (Resizing Control)
     // ─────────────────────────────────────────────────────────────────
 
-    private fun setupSizeControlPanel(view: View) {
+    private val resizableKeyIds = intArrayOf(
+        R.id.btn_1, R.id.btn_2, R.id.btn_3, R.id.btn_4, R.id.btn_5, R.id.btn_6, R.id.btn_7, R.id.btn_8, R.id.btn_9, R.id.btn_0,
+        R.id.btn_q, R.id.btn_w, R.id.btn_e, R.id.btn_r, R.id.btn_t, R.id.btn_y, R.id.btn_u, R.id.btn_i, R.id.btn_o, R.id.btn_p, R.id.btn_gh, R.id.btn_uu,
+        R.id.btn_a, R.id.btn_s, R.id.btn_d, R.id.btn_f, R.id.btn_g, R.id.btn_h, R.id.btn_j, R.id.btn_k, R.id.btn_l, R.id.btn_sh, R.id.btn_ii,
+        R.id.btn_shift, R.id.btn_z, R.id.btn_x, R.id.btn_c, R.id.btn_v, R.id.btn_b, R.id.btn_n, R.id.btn_m, R.id.btn_oe, R.id.btn_ch, R.id.btn_delete,
+        R.id.btn_sym, R.id.btn_comma, R.id.btn_fn, R.id.btn_space, R.id.btn_period, R.id.btn_enter,
+        R.id.sym_1, R.id.sym_2, R.id.sym_3, R.id.sym_4, R.id.sym_5, R.id.sym_6, R.id.sym_7, R.id.sym_8, R.id.sym_9, R.id.sym_0,
+        R.id.sym_excl, R.id.sym_at, R.id.sym_hash, R.id.sym_dol, R.id.sym_pct, R.id.sym_amp, R.id.sym_star, R.id.sym_lpar, R.id.sym_rpar, R.id.sym_under,
+        R.id.sym_more, R.id.sym_minus, R.id.sym_plus, R.id.sym_eq, R.id.sym_slash, R.id.sym_colon, R.id.sym_semi, R.id.sym_apos, R.id.sym_quot, R.id.sym_delete,
+        R.id.sym_abc, R.id.sym_comma, R.id.sym_space, R.id.sym_period, R.id.sym_enter
+    )
+
+    /** Boyutlandırılabilir tuşları bir kez toplar — sürükleme sırasında her framede findViewById çağırmamak için. */
+    private fun collectResizableButtons(rootView: View): List<View> {
+        val result = ArrayList<View>(resizableKeyIds.size)
+        for (id in resizableKeyIds) {
+            val btn = rootView.findViewById<View>(id) ?: continue
+            result.add(btn)
+        }
+        return result
+    }
+
+    /**
+     * ⠿ tuşuna basılı tutup dikey sürükleyerek klavye yüksekliğini canlı değiştirir
+     * (GBoard'daki basılı-tut-sürükle davranışı). Eski tıkla-artır/azalt panelinin yerini alır.
+     */
+    private fun setupResizeDrag(view: View, buttons: List<View>) {
         val tbDefault          = view.findViewById<View>(R.id.toolbar_default) ?: return
         val toolbarSizeControl = view.findViewById<View>(R.id.toolbar_size_control) ?: return
-        val btnMenu            = view.findViewById<Button>(R.id.btn_menu)
-        val btnMinus           = view.findViewById<Button>(R.id.btn_size_minus)
-        val btnPlus            = view.findViewById<Button>(R.id.btn_size_plus)
-        val btnClose           = view.findViewById<Button>(R.id.btn_size_close)
+        val btnMenu            = view.findViewById<Button>(R.id.btn_menu) ?: return
         val tvPercent          = view.findViewById<TextView>(R.id.tv_size_percent)
+
+        var dragStartRawY = 0f
+        var dragStartHeightDp = currentKeyHeightDp
 
         fun updatePercentText() {
             val pct = (currentKeyHeightDp * 100) / DEFAULT_KEY_HEIGHT_DP
             tvPercent?.text = "%$pct"
         }
 
-        bindInstantTouch(btnMenu) {
-            tbDefault.visibility          = View.GONE
-            toolbarSuggestions?.visibility = View.GONE
-            toolbarSizeControl.visibility = View.VISIBLE
-            updatePercentText()
-        }
-
-        bindInstantTouch(btnMinus) {
-            if (currentKeyHeightDp > 36) {
-                currentKeyHeightDp -= 3
-                prefs.edit().putInt("key_height_dp", currentKeyHeightDp).apply()
-                applyKeyHeight(view, currentKeyHeightDp)
-                updatePercentText()
+        btnMenu.setOnTouchListener { touchedView, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    touchedView.isPressed = true
+                    dragStartRawY = event.rawY
+                    dragStartHeightDp = currentKeyHeightDp
+                    tbDefault.visibility           = View.GONE
+                    toolbarSuggestions?.visibility = View.GONE
+                    toolbarSizeControl.visibility  = View.VISIBLE
+                    updatePercentText()
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    // Yukarı sürükleme = büyüt, aşağı sürükleme = küçült (GBoard davranışı)
+                    val deltaPx = dragStartRawY - event.rawY
+                    val deltaDp = (deltaPx / resources.displayMetrics.density).toInt()
+                    val newHeightDp = (dragStartHeightDp + deltaDp).coerceIn(36, 64)
+                    if (newHeightDp != currentKeyHeightDp) {
+                        currentKeyHeightDp = newHeightDp
+                        applyKeyHeight(buttons, currentKeyHeightDp)
+                        updatePercentText()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    touchedView.isPressed = false
+                    prefs.edit().putInt("key_height_dp", currentKeyHeightDp).apply()
+                    toolbarSizeControl.visibility = View.GONE
+                    updateSuggestions()
+                    true
+                }
+                else -> false
             }
-        }
-
-        bindInstantTouch(btnPlus) {
-            if (currentKeyHeightDp < 64) {
-                currentKeyHeightDp += 3
-                prefs.edit().putInt("key_height_dp", currentKeyHeightDp).apply()
-                applyKeyHeight(view, currentKeyHeightDp)
-                updatePercentText()
-            }
-        }
-
-        bindInstantTouch(btnClose) {
-            toolbarSizeControl.visibility = View.GONE
-            updateSuggestions()
         }
     }
 
-    private fun applyKeyHeight(rootView: View, heightDp: Int) {
+    private fun applyKeyHeight(buttons: List<View>, heightDp: Int) {
         val heightPx = (heightDp * resources.displayMetrics.density).toInt()
-
-        val keyIds = intArrayOf(
-            R.id.btn_1, R.id.btn_2, R.id.btn_3, R.id.btn_4, R.id.btn_5, R.id.btn_6, R.id.btn_7, R.id.btn_8, R.id.btn_9, R.id.btn_0,
-            R.id.btn_q, R.id.btn_w, R.id.btn_e, R.id.btn_r, R.id.btn_t, R.id.btn_y, R.id.btn_u, R.id.btn_i, R.id.btn_o, R.id.btn_p, R.id.btn_gh, R.id.btn_uu,
-            R.id.btn_a, R.id.btn_s, R.id.btn_d, R.id.btn_f, R.id.btn_g, R.id.btn_h, R.id.btn_j, R.id.btn_k, R.id.btn_l, R.id.btn_sh, R.id.btn_ii,
-            R.id.btn_shift, R.id.btn_z, R.id.btn_x, R.id.btn_c, R.id.btn_v, R.id.btn_b, R.id.btn_n, R.id.btn_m, R.id.btn_oe, R.id.btn_ch, R.id.btn_delete,
-            R.id.btn_sym, R.id.btn_comma, R.id.btn_fn, R.id.btn_space, R.id.btn_period, R.id.btn_enter,
-            R.id.sym_1, R.id.sym_2, R.id.sym_3, R.id.sym_4, R.id.sym_5, R.id.sym_6, R.id.sym_7, R.id.sym_8, R.id.sym_9, R.id.sym_0,
-            R.id.sym_excl, R.id.sym_at, R.id.sym_hash, R.id.sym_dol, R.id.sym_pct, R.id.sym_amp, R.id.sym_star, R.id.sym_lpar, R.id.sym_rpar, R.id.sym_under,
-            R.id.sym_more, R.id.sym_minus, R.id.sym_plus, R.id.sym_eq, R.id.sym_slash, R.id.sym_colon, R.id.sym_semi, R.id.sym_apos, R.id.sym_quot, R.id.sym_delete,
-            R.id.sym_abc, R.id.sym_comma, R.id.sym_space, R.id.sym_period, R.id.sym_enter
-        )
-
-        for (id in keyIds) {
-            val btn = rootView.findViewById<View>(id) ?: continue
+        for (btn in buttons) {
             val lp = btn.layoutParams
             if (lp != null && lp.height != heightPx) {
                 lp.height = heightPx
@@ -457,6 +556,7 @@ class CustomKeyboardService : InputMethodService() {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     view.isPressed = true
+                    playKeyFeedback(view)
                     performDelete()
                     deleteHandler.postDelayed(deleteRunnable, 300L)
                     true
@@ -580,6 +680,29 @@ class CustomKeyboardService : InputMethodService() {
         val ic = currentInputConnection ?: return
         val word = wordBuffer.toString().trim()
 
+        // Çift Boşlukla Nokta: art arda (350ms içinde) iki kez boşluğa basılırsa,
+        // aradaki boşluğu ". " ile değiştirir (GBoard davranışı).
+        if (text == " ") {
+            val now = System.currentTimeMillis()
+            val doubleSpaceEnabled = prefs.getBoolean("double_space_period_enabled", true)
+            val isQuickSecondSpace = doubleSpaceEnabled && word.isEmpty() && (now - lastSpaceCommitTime) < 350L
+            lastSpaceCommitTime = now
+
+            if (isQuickSecondSpace) {
+                val before = ic.getTextBeforeCursor(2, 0)?.toString() ?: ""
+                val prevChar = if (before.length >= 2) before[before.length - 2] else null
+                if (before.endsWith(" ") && prevChar != null && prevChar.isLetterOrDigit()) {
+                    ic.deleteSurroundingText(1, 0)
+                    ic.commitText(". ", 1)
+                    wordBuffer.clear()
+                    updateSuggestions()
+                    maybeAutoCapitalizeAfterSentenceEnd(ic)
+                    if (isFnActive) { isFnActive = false; updateFnVisual() }
+                    return
+                }
+            }
+        }
+
         if (word.isNotEmpty()) {
             if (ProfanityFilter.isProfane(word)) {
                 // Kelimeyi tamamen sil — boşluk bırak, *** koyma
@@ -594,7 +717,9 @@ class CustomKeyboardService : InputMethodService() {
                 // Otomatik Düzeltme (Auto-Correction):
                 // Eğer ortadaki öneri (btnSuggest2) farklı bir kelime ise ve gösteriliyorsa otomatik tamamla
                 val autocorrectEnabled = prefs.getBoolean("autocorrect_enabled", true)
-                if (autocorrectEnabled) {
+                // suggestionWordContext == word: gösterilen öneri, arka planda hesaplanması
+                // henüz tamamlanmamış eski bir kelimeye değil, tam olarak bu kelimeye ait olmalı.
+                if (autocorrectEnabled && suggestionWordContext.equals(word, ignoreCase = true)) {
                     val autoCorrectCandidate = btnSuggest2?.text?.toString()?.trim() ?: ""
                     if (autoCorrectCandidate.isNotEmpty() &&
                         !autoCorrectCandidate.equals(word, ignoreCase = true) &&
@@ -611,7 +736,28 @@ class CustomKeyboardService : InputMethodService() {
         wordBuffer.clear()
         updateSuggestions()
 
+        if (text == " ") {
+            maybeAutoCapitalizeAfterSentenceEnd(ic)
+        }
+
         if (isFnActive) { isFnActive = false; updateFnVisual() }
+    }
+
+    /**
+     * Boşluktan hemen önceki karakter cümle sonu noktalaması (. ! ?) ise
+     * bir sonraki harfi otomatik büyük harfle başlatır (GBoard davranışı).
+     */
+    private fun maybeAutoCapitalizeAfterSentenceEnd(ic: InputConnection) {
+        if (!prefs.getBoolean("auto_capitalize_enabled", true)) return
+        if (isPasswordField(currentEditorInfo)) return
+        val before = ic.getTextBeforeCursor(2, 0)?.toString() ?: return
+        if (before.length < 2) return
+        val punct = before[before.length - 2]
+        val space = before[before.length - 1]
+        if (space == ' ' && (punct == '.' || punct == '!' || punct == '?') && shiftMode == 0) {
+            shiftMode = 1
+            updateShiftVisual()
+        }
     }
 
     /**
@@ -646,6 +792,17 @@ class CustomKeyboardService : InputMethodService() {
 
     private fun performDelete() {
         val ic = currentInputConnection ?: return
+
+        // Seçili metin varsa (ör. Fn+A ile "Tümünü Seç") deleteSurroundingText bunu görmezden
+        // gelip imlecin hemen önündeki tek karakteri siler. Önce seçimi kontrol edip tamamını sil.
+        val selectedText = ic.getSelectedText(0)
+        if (!selectedText.isNullOrEmpty()) {
+            ic.commitText("", 1)
+            wordBuffer.clear()
+            updateSuggestions()
+            return
+        }
+
         if (wordBuffer.isNotEmpty()) wordBuffer.deleteAt(wordBuffer.length - 1)
         ic.deleteSurroundingText(1, 0)
         updateSuggestions()

@@ -54,8 +54,20 @@ class ShortcutRepository(context: Context) {
         return result
     }
 
-    /** Tek kısayol döner. */
-    fun get(key: Char): Shortcut? = getAll()[key.lowercaseChar()]
+    /** Tek kısayol döner — tüm kısayolları taramak yerine doğrudan tek kaydı okur. */
+    fun get(key: Char): Shortcut? {
+        val raw = prefs.getString(key.lowercaseChar().toString(), null) ?: return null
+        return try {
+            val json = JSONObject(raw)
+            Shortcut(
+                key = key.lowercaseChar(),
+                action = ActionType.valueOf(json.getString("action")),
+                text = json.optString("text", "")
+            )
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     /** Kısayolu kaydeder. Aynı harf varsa üzerine yazar. */
     fun save(shortcut: Shortcut) {

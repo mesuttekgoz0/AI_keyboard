@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1B1C1E"
-    android:fillViewport="true">
+    android:orientation="vertical">
 
+    <!-- ── HEADER (sabit) ── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -12,9 +14,8 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingTop="48dp"
-        android:paddingBottom="32dp">
+        android:paddingBottom="16dp">
 
-        <!-- ── HEADER ── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,384 +53,659 @@
             android:text="Akıllı klavye yönetim paneli"
             android:textColor="#6E6E73"
             android:textSize="13sp"
-            android:layout_marginBottom="28dp" />
+            android:layout_marginBottom="20dp" />
 
-        <!-- ── KURULUM KARTI ── -->
+        <!-- ── SEKME ÇUBUĞU ── -->
         <LinearLayout
+            android:id="@+id/tab_bar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="20dp"
-            android:layout_marginBottom="20dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Klavye Kurulumu"
-                    android:textColor="#E8EAED"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ADIM"
-                    android:textColor="#8AB4F8"
-                    android:textSize="10sp"
-                    android:letterSpacing="0.15" />
-            </LinearLayout>
-
-            <!-- Step 1 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:text="1"
-                    android:gravity="center"
-                    android:textColor="#1B1C1E"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:background="@drawable/bg_key_enter"
-                    android:layout_marginEnd="12dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Klavyeyi Etkinleştir"
-                        android:textColor="#E8EAED"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Sistem ayarlarından AI Klavyeyi aç"
-                        android:textColor="#6E6E73"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/btn_enable_keyboard"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:text="Aç"
-                    android:textAllCaps="false"
-                    android:textColor="#1B1C1E"
-                    android:textSize="13sp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:backgroundTint="#8AB4F8" />
-            </LinearLayout>
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#2E2F32"
-                android:layout_marginBottom="12dp" />
-
-            <!-- Step 2 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:text="2"
-                    android:gravity="center"
-                    android:textColor="#E8EAED"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:background="@drawable/bg_key_special"
-                    android:layout_marginEnd="12dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="AI Klavyeyi Seç"
-                        android:textColor="#E8EAED"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Klavye seçici menüsünü aç"
-                        android:textColor="#6E6E73"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/btn_select_keyboard"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:text="Seç"
-                    android:textAllCaps="false"
-                    android:textColor="#E8EAED"
-                    android:textSize="13sp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:backgroundTint="#3A3B3E" />
-            </LinearLayout>
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#2E2F32"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp" />
-
-            <!-- Otomatik Düzeltme Toggle -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Otomatik Düzeltme"
-                        android:textColor="#E8EAED"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Boşluk/noktalama basınca kelimeyi düzelt"
-                        android:textColor="#6E6E73"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_autocorrect"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    app:thumbTint="#8AB4F8"
-                    app:trackTint="#3A3B3E"
-                    xmlns:app="http://schemas.android.com/apk/res-auto" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- ── FİLTRE YÖNETİMİ KARTI ── -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="20dp">
-
-            <!-- Kart başlığı -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="6dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🚫  Filtre Yönetimi"
-                    android:textColor="#E8EAED"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_word_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 kelime"
-                    android:textColor="#8AB4F8"
-                    android:textSize="12sp" />
-            </LinearLayout>
+            android:layout_height="44dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_tab_bar"
+            android:padding="3dp">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Yasaklı kelimeleri ekle veya kaldır"
-                android:textColor="#6E6E73"
-                android:textSize="12sp"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Kelime ekleme satırı -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
-
-                <EditText
-                    android:id="@+id/et_new_word"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_weight="1"
-                    android:hint="Kelime ekle..."
-                    android:textColor="#E8EAED"
-                    android:textSize="14sp"
-                    android:inputType="text"
-                    android:imeOptions="actionDone"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:background="@drawable/bg_input_field"
-                    android:layout_marginEnd="10dp" />
-
-                <Button
-                    android:id="@+id/btn_add_word"
-                    android:layout_width="wrap_content"
-                    android:layout_height="44dp"
-                    android:text="Ekle"
-                    android:textAllCaps="false"
-                    android:textColor="#1B1C1E"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:backgroundTint="#8AB4F8" />
-            </LinearLayout>
-
-            <!-- Boş durum mesajı -->
-            <TextView
-                android:id="@+id/tv_empty_state"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Henüz yasaklı kelime yok.\nYukarıdan ekleyebilirsin."
-                android:textColor="#4A4B50"
-                android:textSize="13sp"
+                android:id="@+id/tab_setup"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:visibility="gone" />
-
-            <!-- Kelime listesi -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_words"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:overScrollMode="never"
-                android:divider="@null" />
-        </LinearLayout>
-
-        <!-- ── KISAYOL YÖNETİMİ KARTI ── -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="20dp"
-            android:layout_marginTop="20dp">
-
-            <!-- Kart başlığı -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="6dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="⚡  Kısayollar"
-                    android:textColor="#E8EAED"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_shortcut_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 kısayol"
-                    android:textColor="#8AB4F8"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Fn + harf kombinasyonlarını özelleştir"
-                android:textColor="#6E6E73"
-                android:textSize="12sp"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Kısayol Ekle butonu -->
-            <Button
-                android:id="@+id/btn_add_shortcut"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:text="⚡  Kısayol Ekle"
+                android:text="Kurulum"
                 android:textAllCaps="false"
-                android:textColor="#1B1C1E"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:backgroundTint="#8AB4F8"
-                android:layout_marginBottom="12dp" />
+                android:textColor="#1B1C1E"
+                android:background="@drawable/bg_tab_selected" />
 
-            <!-- Boş durum -->
             <TextView
-                android:id="@+id/tv_shortcut_empty"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Henüz kısayol yok.\nFn tuşu + harf kombinasyonları için ekle."
-                android:textColor="#4A4B50"
-                android:textSize="13sp"
+                android:id="@+id/tab_settings"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:visibility="gone" />
+                android:text="Ayarlar"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#9E9E9E" />
 
-            <!-- Kısayol listesi -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_shortcuts"
+            <TextView
+                android:id="@+id/tab_filter"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Filtre"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#9E9E9E" />
+
+            <TextView
+                android:id="@+id/tab_shortcuts"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Kısayollar"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#9E9E9E" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ── SEKME İÇERİĞİ ── -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="32dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- ══════════════ PANEL: KURULUM ══════════════ -->
+            <LinearLayout
+                android:id="@+id/panel_setup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:overScrollMode="never" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="20dp"
+                android:visibility="visible">
 
-    </LinearLayout>
-</ScrollView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Klavye Kurulumu"
+                        android:textColor="#E8EAED"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ADIM"
+                        android:textColor="#8AB4F8"
+                        android:textSize="10sp"
+                        android:letterSpacing="0.15" />
+                </LinearLayout>
+
+                <!-- Step 1 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="1"
+                        android:gravity="center"
+                        android:textColor="#1B1C1E"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_key_enter"
+                        android:layout_marginEnd="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Klavyeyi Etkinleştir"
+                            android:textColor="#E8EAED"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sistem ayarlarından AI Klavyeyi aç"
+                            android:textColor="#6E6E73"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_enable_keyboard"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Aç"
+                        android:textAllCaps="false"
+                        android:textColor="#1B1C1E"
+                        android:textSize="13sp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:backgroundTint="#8AB4F8" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2F32"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Step 2 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="2"
+                        android:gravity="center"
+                        android:textColor="#E8EAED"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_key_special"
+                        android:layout_marginEnd="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="AI Klavyeyi Seç"
+                            android:textColor="#E8EAED"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Klavye seçici menüsünü aç"
+                            android:textColor="#6E6E73"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_select_keyboard"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Seç"
+                        android:textAllCaps="false"
+                        android:textColor="#E8EAED"
+                        android:textSize="13sp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:backgroundTint="#3A3B3E" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ══════════════ PANEL: AYARLAR ══════════════ -->
+            <LinearLayout
+                android:id="@+id/panel_settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="20dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⚙️  Yazma Ayarları"
+                    android:textColor="#E8EAED"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Otomatik Düzeltme -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Otomatik Düzeltme"
+                            android:textColor="#E8EAED"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Boşluk/noktalama basınca kelimeyi düzelt"
+                            android:textColor="#6E6E73"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_autocorrect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="#8AB4F8"
+                        app:trackTint="#3A3B3E" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2F32"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Cümle Sonrası Büyük Harf -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Otomatik Büyük Harf"
+                            android:textColor="#E8EAED"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Her cümlenin ilk harfini otomatik büyült"
+                            android:textColor="#6E6E73"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_auto_capitalize"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="#8AB4F8"
+                        app:trackTint="#3A3B3E" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2F32"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Çift Boşlukla Nokta -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Çift Boşlukla Nokta"
+                            android:textColor="#E8EAED"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Boşluğa iki kez basınca nokta ekler"
+                            android:textColor="#6E6E73"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_double_space_period"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="#8AB4F8"
+                        app:trackTint="#3A3B3E" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2F32"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Tuş Sesi -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tuş Sesi"
+                            android:textColor="#E8EAED"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Her tuşa basışta kısa bir ses çal"
+                            android:textColor="#6E6E73"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_key_sound"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        app:thumbTint="#8AB4F8"
+                        app:trackTint="#3A3B3E" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2F32"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Tuş Titreşimi -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tuş Titreşimi"
+                            android:textColor="#E8EAED"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Her tuşa basışta titreşim ver"
+                            android:textColor="#6E6E73"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_key_vibration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="#8AB4F8"
+                        app:trackTint="#3A3B3E" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ══════════════ PANEL: FİLTRE ══════════════ -->
+            <LinearLayout
+                android:id="@+id/panel_filter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="20dp"
+                android:visibility="gone">
+
+                <!-- Kart başlığı -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="🚫  Filtre Yönetimi"
+                        android:textColor="#E8EAED"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_word_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 kelime"
+                        android:textColor="#8AB4F8"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Yasaklı kelimeleri ekle veya kaldır"
+                    android:textColor="#6E6E73"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Kelime ekleme satırı -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <EditText
+                        android:id="@+id/et_new_word"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:hint="Kelime ekle..."
+                        android:textColor="#E8EAED"
+                        android:textSize="14sp"
+                        android:inputType="text"
+                        android:imeOptions="actionDone"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:background="@drawable/bg_input_field"
+                        android:layout_marginEnd="10dp" />
+
+                    <Button
+                        android:id="@+id/btn_add_word"
+                        android:layout_width="wrap_content"
+                        android:layout_height="44dp"
+                        android:text="Ekle"
+                        android:textAllCaps="false"
+                        android:textColor="#1B1C1E"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:backgroundTint="#8AB4F8" />
+                </LinearLayout>
+
+                <!-- Boş durum mesajı -->
+                <TextView
+                    android:id="@+id/tv_empty_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Henüz yasaklı kelime yok.\nYukarıdan ekleyebilirsin."
+                    android:textColor="#4A4B50"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:visibility="gone" />
+
+                <!-- Kelime listesi -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_words"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
+                    android:divider="@null" />
+            </LinearLayout>
+
+            <!-- ══════════════ PANEL: KISAYOLLAR ══════════════ -->
+            <LinearLayout
+                android:id="@+id/panel_shortcuts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="20dp"
+                android:visibility="gone">
+
+                <!-- Kart başlığı -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="⚡  Kısayollar"
+                        android:textColor="#E8EAED"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_shortcut_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 kısayol"
+                        android:textColor="#8AB4F8"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fn + harf kombinasyonlarını özelleştir"
+                    android:textColor="#6E6E73"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Kısayol Ekle butonu -->
+                <Button
+                    android:id="@+id/btn_add_shortcut"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="⚡  Kısayol Ekle"
+                    android:textAllCaps="false"
+                    android:textColor="#1B1C1E"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:backgroundTint="#8AB4F8"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Boş durum -->
+                <TextView
+                    android:id="@+id/tv_shortcut_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Henüz kısayol yok.\nFn tuşu + harf kombinasyonları için ekle."
+                    android:textColor="#4A4B50"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:visibility="gone" />
+
+                <!-- Kısayol listesi -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_shortcuts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never" />
+            </LinearLayout>
+
+        </FrameLayout>
+    </ScrollView>
+
+</LinearLayout>

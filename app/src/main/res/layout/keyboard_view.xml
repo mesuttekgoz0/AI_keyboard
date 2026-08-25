@@ -122,70 +122,31 @@
 
         </LinearLayout>
 
-        <!-- Boyut Ayarlama Paneli (Menüden açılır) -->
+        <!-- Boyut Göstergesi (⠿ tuşuna basılı tutup sürüklerken görünür) -->
         <LinearLayout
             android:id="@+id/toolbar_size_control"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📐 Boyut:"
+                android:text="📐 "
                 android:textColor="#C4C6D0"
-                android:textSize="13sp"
-                android:paddingEnd="6dp" />
-
-            <Button
-                android:id="@+id/btn_size_minus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:text="➖"
-                android:textAllCaps="false"
-                android:textColor="#E3E2E6"
-                android:textSize="12sp"
-                android:background="@drawable/bg_key_special"
-                android:padding="0dp" />
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/tv_size_percent"
-                android:layout_width="50dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="%100"
                 android:textColor="#A8C7FA"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:gravity="center" />
-
-            <Button
-                android:id="@+id/btn_size_plus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:text="➕"
-                android:textAllCaps="false"
-                android:textColor="#E3E2E6"
-                android:textSize="12sp"
-                android:background="@drawable/bg_key_special"
-                android:padding="0dp" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/btn_size_close"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:text="✕"
-                android:textAllCaps="false"
-                android:textColor="#E3E2E6"
-                android:textSize="13sp"
-                android:background="@drawable/bg_key_special"
-                android:padding="0dp" />
         </LinearLayout>
 
         <!-- Engellenen Kelime Bildirimi (2 sn görünür, sonra kaybolur) -->

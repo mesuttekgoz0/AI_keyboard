@@ -51,8 +51,10 @@ class MainActivity : AppCompatActivity() {
         wordRepository     = WordRepository(this)
         shortcutRepository = ShortcutRepository(this)
 
+        setupTabs()
         setupFilterSection()
         setupShortcutSection()
+        setupSettingsSection()
         updateStatus()
     }
 
@@ -72,6 +74,36 @@ class MainActivity : AppCompatActivity() {
         } else {
             tvStatusBadge.text = "⚠️ Pasif"
             tvStatusBadge.setTextColor(0xFFFF9800.toInt())
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // SEKMELER
+    // ══════════════════════════════════════════════════════════════════
+
+    private fun setupTabs() {
+        val tabs = listOf(
+            R.id.tab_setup     to R.id.panel_setup,
+            R.id.tab_settings  to R.id.panel_settings,
+            R.id.tab_filter    to R.id.panel_filter,
+            R.id.tab_shortcuts to R.id.panel_shortcuts
+        )
+
+        fun selectTab(selectedTabId: Int) {
+            for ((tabId, panelId) in tabs) {
+                val tab = findViewById<TextView>(tabId)
+                val isSelected = tabId == selectedTabId
+                tab.background = if (isSelected)
+                    androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_tab_selected)
+                else null
+                tab.setTextColor(if (isSelected) 0xFF1B1C1E.toInt() else 0xFF9E9E9E.toInt())
+                findViewById<android.view.View>(panelId).visibility =
+                    if (isSelected) android.view.View.VISIBLE else android.view.View.GONE
+            }
+        }
+
+        for ((tabId, _) in tabs) {
+            findViewById<TextView>(tabId).setOnClickListener { selectTab(tabId) }
         }
     }
 
@@ -102,16 +134,6 @@ class MainActivity : AppCompatActivity() {
         btnSelect.setOnClickListener {
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showInputMethodPicker()
-        }
-
-        // Otomatik Düzeltme toggle
-        val switchAutocorrect = findViewById<SwitchCompat>(R.id.switch_autocorrect)
-        val keyboardPrefs = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
-        switchAutocorrect.isChecked = keyboardPrefs.getBoolean("autocorrect_enabled", true)
-        switchAutocorrect.setOnCheckedChangeListener { _, isChecked ->
-            keyboardPrefs.edit().putBoolean("autocorrect_enabled", isChecked).apply()
-            val state = if (isChecked) "Otomatik Düzeltme Açık" else "Otomatik Düzeltme Kapalı"
-            Toast.makeText(this, state, Toast.LENGTH_SHORT).show()
         }
 
         btnAddWord.setOnClickListener { addWordFromInput() }
@@ -157,6 +179,44 @@ class MainActivity : AppCompatActivity() {
     private fun refreshWordCount(count: Int) {
         tvWordCount.text = "$count kelime"
         tvEmptyState.visibility = if (count == 0) android.view.View.VISIBLE else android.view.View.GONE
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // AYARLAR BÖLÜMÜ
+    // ══════════════════════════════════════════════════════════════════
+
+    private fun setupSettingsSection() {
+        val keyboardPrefs = getSharedPreferences("keyboard_settings", MODE_PRIVATE)
+
+        fun bindSwitch(id: Int, prefKey: String, default: Boolean, toastOn: String, toastOff: String) {
+            val switch = findViewById<SwitchCompat>(id)
+            switch.isChecked = keyboardPrefs.getBoolean(prefKey, default)
+            switch.setOnCheckedChangeListener { _, isChecked ->
+                keyboardPrefs.edit().putBoolean(prefKey, isChecked).apply()
+                Toast.makeText(this, if (isChecked) toastOn else toastOff, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        bindSwitch(
+            R.id.switch_autocorrect, "autocorrect_enabled", true,
+            "Otomatik Düzeltme Açık", "Otomatik Düzeltme Kapalı"
+        )
+        bindSwitch(
+            R.id.switch_auto_capitalize, "auto_capitalize_enabled", true,
+            "Otomatik Büyük Harf Açık", "Otomatik Büyük Harf Kapalı"
+        )
+        bindSwitch(
+            R.id.switch_double_space_period, "double_space_period_enabled", true,
+            "Çift Boşlukla Nokta Açık", "Çift Boşlukla Nokta Kapalı"
+        )
+        bindSwitch(
+            R.id.switch_key_sound, "key_sound_enabled", false,
+            "Tuş Sesi Açık", "Tuş Sesi Kapalı"
+        )
+        bindSwitch(
+            R.id.switch_key_vibration, "key_vibration_enabled", true,
+            "Tuş Titreşimi Açık", "Tuş Titreşimi Kapalı"
+        )
     }
 
     // ══════════════════════════════════════════════════════════════════
