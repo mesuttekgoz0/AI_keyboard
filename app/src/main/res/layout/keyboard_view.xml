@@ -11,6 +11,7 @@
     <!-- Araç Çubuğu / Öneri Şeridi / Boyut Paneli     -->
     <!-- ══════════════════════════════════════════════ -->
     <FrameLayout
+        android:id="@+id/toolbar_frame"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="#1C1B1F"
@@ -169,6 +170,117 @@
                 android:textStyle="bold" />
         </LinearLayout>
     </FrameLayout>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- AI İstem Paneli — AI tuşuna basınca toolbar'ın yerine açılır. -->
+    <!-- Alttaki harf tuşları görünür kalır; basılan harfler bu       -->
+    <!-- paneldeki tampona yazılır (InputConnection'a değil).         -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/ai_prompt_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1C1B1F"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_ai_selection_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text=""
+            android:textColor="#8AB4F8"
+            android:textSize="11sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="@drawable/bg_input_field"
+            android:layout_marginBottom="6dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_ai_prompt_buffer"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:gravity="top|start"
+            android:text=""
+            android:hint="Ne yapmamı istersin? Örn: imlayı düzelt, Ahmet ismiyle akrostiş yaz..."
+            android:textColor="#E3E2E6"
+            android:textColorHint="#5F6368"
+            android:textSize="13sp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:background="@drawable/bg_input_field"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/tv_ai_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#FF6B6B"
+            android:textSize="11sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="#3D1A1A"
+            android:layout_marginBottom="6dp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/btn_ai_cancel"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Vazgeç"
+                android:textAllCaps="false"
+                android:textColor="#E3E2E6"
+                android:textSize="13sp"
+                android:background="@drawable/bg_key_special"
+                android:padding="0dp"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_ai_send"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Gönder"
+                android:textAllCaps="false"
+                android:textColor="#1B1C1E"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_ai_button"
+                android:padding="0dp" />
+
+            <ProgressBar
+                android:id="@+id/pb_ai_loading"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="8dp"
+                android:indeterminateTint="#8AB4F8"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
 
     <!-- ══════════════════════════════════════════════════════════ -->
     <!-- Satır 0: 1 2 3 4 5 6 7 8 9 0                              -->

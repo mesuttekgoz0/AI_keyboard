@@ -90,6 +90,18 @@
                 android:textColor="#9E9E9E" />
 
             <TextView
+                android:id="@+id/tab_ai"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="AI"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#9E9E9E" />
+
+            <TextView
                 android:id="@+id/tab_filter"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -520,6 +532,123 @@
                         app:thumbTint="#8AB4F8"
                         app:trackTint="#3A3B3E" />
                 </LinearLayout>
+            </LinearLayout>
+
+            <!-- ══════════════ PANEL: AI ══════════════ -->
+            <LinearLayout
+                android:id="@+id/panel_ai"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="20dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🤖  AI Ayarları"
+                    android:textColor="#E8EAED"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Metin seçip AI tuşuna bas, ya da hiç metin seçmeden bir şey yazdır (ör. &quot;Ahmet ismiyle akrostiş yaz&quot;). AI özelliği kendi NVIDIA NIM API key'inle çalışır."
+                    android:textColor="#6E6E73"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:id="@+id/tv_api_key_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="API key kontrol ediliyor..."
+                    android:textColor="#8AB4F8"
+                    android:textSize="12sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:background="@drawable/bg_input_field"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- API key giriş satırı -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="10dp">
+
+                    <EditText
+                        android:id="@+id/et_api_key"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:hint="NVIDIA NIM API Key"
+                        android:textColor="#E8EAED"
+                        android:textColorHint="#4A4B50"
+                        android:textSize="14sp"
+                        android:inputType="textPassword"
+                        android:imeOptions="actionDone"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:background="@drawable/bg_input_field"
+                        android:layout_marginEnd="10dp" />
+
+                    <Button
+                        android:id="@+id/btn_toggle_key_visibility"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:text="👁"
+                        android:textSize="16sp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:padding="0dp"
+                        android:backgroundTint="#3A3B3E" />
+                </LinearLayout>
+
+                <!-- Kaydet / Temizle -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_save_api_key"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:text="Kaydet"
+                        android:textAllCaps="false"
+                        android:textColor="#1B1C1E"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:backgroundTint="#8AB4F8"
+                        android:layout_marginEnd="10dp" />
+
+                    <Button
+                        android:id="@+id/btn_clear_api_key"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:text="Temizle"
+                        android:textAllCaps="false"
+                        android:textColor="#E8EAED"
+                        android:textSize="14sp"
+                        android:backgroundTint="#3A3B3E" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Key'ini build.nvidia.com üzerinden alabilirsin. Buraya girdiğin key yalnızca bu cihazda saklanır."
+                    android:textColor="#4A4B50"
+                    android:textSize="11sp"
+                    android:layout_marginTop="12dp" />
             </LinearLayout>
 
             <!-- ══════════════ PANEL: FİLTRE ══════════════ -->

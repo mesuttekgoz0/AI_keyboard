@@ -17,9 +17,11 @@ import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import com.fraunhofer.aikeyboard2.R
+import com.fraunhofer.aikeyboard2.ai.AiClient
+import com.fraunhofer.aikeyboard2.ai.ApiKeyProvider
 import com.fraunhofer.aikeyboard2.autocomplete.AutoCorrectEngine
 import com.fraunhofer.aikeyboard2.filter.ProfanityFilter
 import java.util.concurrent.Executors
@@ -104,6 +106,29 @@ class CustomKeyboardService : InputMethodService() {
     // Boyutlandırma sırasında tekrar tekrar findViewById çağırmamak için önbelleklenen tuş listesi
     private var resizableButtons: List<View> = emptyList()
 
+    // ─────────────────────────────────────────────────────────────────
+    // AI İstem Paneli
+    // ─────────────────────────────────────────────────────────────────
+    // AI modundayken harf tuşları InputConnection'a değil bu tampona yazar —
+    // panel IME'nin kendi penceresi içinde olduğu için sistem klavyesi (kendisi)
+    // içine gerçek bir EditText koyup ikinci bir soft-keyboard açtıramayız.
+    private var isShowingSymbolView = false
+    private var isAiPromptMode = false
+    private val aiPromptBuffer = StringBuilder()
+    private var aiSelectedText: String? = null
+    private var aiRequestId = 0
+    private val aiExecutor = Executors.newSingleThreadExecutor()
+    private val aiHandler = Handler(Looper.getMainLooper())
+
+    private var toolbarFrame: View? = null
+    private var aiPromptPanel: View? = null
+    private var tvAiSelectionPreview: TextView? = null
+    private var tvAiPromptBuffer: TextView? = null
+    private var tvAiError: TextView? = null
+    private var btnAiCancel: Button? = null
+    private var btnAiSend: Button? = null
+    private var pbAiLoading: ProgressBar? = null
+
     // Uzun basış silme Handler
     private val deleteHandler = Handler(Looper.getMainLooper())
     private val deleteRunnable = object : Runnable {
@@ -185,6 +210,7 @@ class CustomKeyboardService : InputMethodService() {
         ProfanityFilter.loadFromRepository(this)
         AutoCorrectEngine.loadDictionary(this)
         if (isFnActive) { isFnActive = false; updateFnVisual() }
+        if (isAiPromptMode) cancelAiPrompt()
         wordBuffer.clear()
         lastSpaceCommitTime = 0L
 
@@ -212,11 +238,14 @@ class CustomKeyboardService : InputMethodService() {
         deleteHandler.removeCallbacks(deleteRunnable)
         blockedHandler.removeCallbacksAndMessages(null)
         suggestionHandler.removeCallbacksAndMessages(null)
+        aiHandler.removeCallbacksAndMessages(null)
+        aiRequestId++ // sürüyor olabilecek AI isteğinin sonucunu geçersiz kıl
     }
 
     override fun onDestroy() {
         super.onDestroy()
         suggestionExecutor.shutdownNow()
+        aiExecutor.shutdownNow()
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -257,6 +286,7 @@ class CustomKeyboardService : InputMethodService() {
     // ─────────────────────────────────────────────────────────────────
 
     private fun buildLetterView(): View {
+        isShowingSymbolView = false
         val view = layoutInflater.inflate(R.layout.keyboard_view, null)
 
         btnShift = view.findViewById(R.id.btn_shift)
@@ -273,6 +303,20 @@ class CustomKeyboardService : InputMethodService() {
         toolbarBlocked   = view.findViewById(R.id.toolbar_blocked)
         tvBlockedMessage = view.findViewById(R.id.tv_blocked_message)
 
+        // AI İstem Paneli Referansları
+        toolbarFrame          = view.findViewById(R.id.toolbar_frame)
+        aiPromptPanel          = view.findViewById(R.id.ai_prompt_panel)
+        tvAiSelectionPreview  = view.findViewById(R.id.tv_ai_selection_preview)
+        tvAiPromptBuffer      = view.findViewById(R.id.tv_ai_prompt_buffer)
+        tvAiError             = view.findViewById(R.id.tv_ai_error)
+        btnAiCancel           = view.findViewById(R.id.btn_ai_cancel)
+        btnAiSend             = view.findViewById(R.id.btn_ai_send)
+        pbAiLoading           = view.findViewById(R.id.pb_ai_loading)
+        bindInstantTouch(btnAiCancel) { cancelAiPrompt() }
+        bindInstantTouch(btnAiSend)   { sendAiPrompt() }
+        // AI moduna devam ediyorsak (klavye görünümü yeniden oluşturulduysa) panel görünümünü tazele
+        if (isAiPromptMode) showAiPromptPanel() else aiPromptPanel?.visibility = View.GONE
+
         // Öneri Tuşları Dokunmaları
         bindInstantTouch(btnSuggest1) { commitSuggestion(btnSuggest1?.text.toString()) }
         bindInstantTouch(btnSuggest2) { commitSuggestion(btnSuggest2?.text.toString()) }
@@ -281,7 +325,12 @@ class CustomKeyboardService : InputMethodService() {
         // Sayı Satırı (1 2 3 4 5 6 7 8 9 0)
         numKeyMap.forEach { (id, char) ->
             bindInstantTouch(view.findViewById(id)) {
-                currentInputConnection?.commitText(char, 1)
+                if (isAiPromptMode) {
+                    aiPromptBuffer.append(char)
+                    updateAiPromptDisplay()
+                } else {
+                    currentInputConnection?.commitText(char, 1)
+                }
             }
         }
 
@@ -337,7 +386,7 @@ class CustomKeyboardService : InputMethodService() {
 
         // Sembol / AI Tuşları
         bindInstantTouch(view.findViewById(R.id.btn_sym)) {
-            setInputView(buildSymbolView())
+            if (!isAiPromptMode) setInputView(buildSymbolView())
         }
         bindInstantTouch(view.findViewById(R.id.btn_ai)) { triggerAI() }
 
@@ -357,6 +406,7 @@ class CustomKeyboardService : InputMethodService() {
     // ─────────────────────────────────────────────────────────────────
 
     private fun buildSymbolView(): View {
+        isShowingSymbolView = true
         val view = layoutInflater.inflate(R.layout.keyboard_symbols_view, null)
 
         symKeyMap.forEach { (id, char) ->
@@ -641,6 +691,13 @@ class CustomKeyboardService : InputMethodService() {
     // ─────────────────────────────────────────────────────────────────
 
     private fun handleCharacter(text: String) {
+        if (isAiPromptMode) {
+            aiPromptBuffer.append(text)
+            updateAiPromptDisplay()
+            if (shiftMode == 1) { shiftMode = 0; updateShiftVisual() }
+            return
+        }
+
         if (isFnActive) {
             val key = text[0].lowercaseChar()
             val shortcut = com.fraunhofer.aikeyboard2.data.ShortcutRepository(this).get(key)
@@ -677,6 +734,12 @@ class CustomKeyboardService : InputMethodService() {
     }
 
     private fun handleSpaceOrPunct(text: String) {
+        if (isAiPromptMode) {
+            aiPromptBuffer.append(text)
+            updateAiPromptDisplay()
+            return
+        }
+
         val ic = currentInputConnection ?: return
         val word = wordBuffer.toString().trim()
 
@@ -783,6 +846,7 @@ class CustomKeyboardService : InputMethodService() {
     }
 
     private fun handleEnter() {
+        if (isAiPromptMode) { sendAiPrompt(); return }
         val ic = currentInputConnection ?: return
         if (!ic.performEditorAction(EditorInfo.IME_ACTION_DONE))
             ic.commitText("\n", 1)
@@ -791,6 +855,12 @@ class CustomKeyboardService : InputMethodService() {
     }
 
     private fun performDelete() {
+        if (isAiPromptMode) {
+            if (aiPromptBuffer.isNotEmpty()) aiPromptBuffer.deleteAt(aiPromptBuffer.length - 1)
+            updateAiPromptDisplay()
+            return
+        }
+
         val ic = currentInputConnection ?: return
 
         // Seçili metin varsa (ör. Fn+A ile "Tümünü Seç") deleteSurroundingText bunu görmezden
@@ -823,10 +893,115 @@ class CustomKeyboardService : InputMethodService() {
         updateSuggestions()
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    // AI İstem Paneli Mantığı
+    // ─────────────────────────────────────────────────────────────────
+
+    /**
+     * AI tuşuna basılınca çalışır. Sembol klavyesindeyse önce harf klavyesine döner
+     * (AI paneli yalnızca keyboard_view.xml içinde var), sonra paneli açar.
+     */
     private fun triggerAI() {
+        if (isAiPromptMode) return
+
+        val selected = currentInputConnection?.getSelectedText(0)?.toString()
+
+        if (isShowingSymbolView) {
+            // Sembol klavyesindeydik — harf klavyesine dön, referanslar buildLetterView içinde tazelenir
+            setInputView(buildLetterView())
+        }
+
+        aiSelectedText = selected
+        aiPromptBuffer.clear()
+        if (isFnActive) { isFnActive = false; updateFnVisual() }
         wordBuffer.clear()
+        showAiPromptPanel()
+    }
+
+    private fun showAiPromptPanel() {
+        isAiPromptMode = true
+        toolbarFrame?.visibility = View.GONE
+        aiPromptPanel?.visibility = View.VISIBLE
+        tvAiError?.visibility = View.GONE
+        tvAiError?.text = ""
+
+        val sel = aiSelectedText
+        if (!sel.isNullOrBlank()) {
+            val preview = if (sel.length > 100) sel.take(100) + "…" else sel
+            tvAiSelectionPreview?.text = "Seçili: “$preview”"
+            tvAiSelectionPreview?.visibility = View.VISIBLE
+        } else {
+            tvAiSelectionPreview?.visibility = View.GONE
+        }
+
+        updateAiPromptDisplay()
+    }
+
+    private fun updateAiPromptDisplay() {
+        tvAiPromptBuffer?.text = aiPromptBuffer.toString()
+    }
+
+    private fun cancelAiPrompt() {
+        aiRequestId++ // sonuç gecikirse geçersiz sayılsın
+        isAiPromptMode = false
+        aiPromptBuffer.clear()
+        aiSelectedText = null
+        aiPromptPanel?.visibility = View.GONE
+        toolbarFrame?.visibility = View.VISIBLE
+        tvAiError?.visibility = View.GONE
         updateSuggestions()
-        Toast.makeText(this, "✨ AI Düzelt tetiklendi!", Toast.LENGTH_SHORT).show()
-        currentInputConnection?.commitText("[AI]", 1)
+    }
+
+    private fun sendAiPrompt() {
+        val prompt = aiPromptBuffer.toString().trim()
+        if (prompt.isEmpty()) {
+            showAiError("Bir istem yaz")
+            return
+        }
+
+        val apiKey = ApiKeyProvider.resolveApiKey(this)
+        if (apiKey.isBlank()) {
+            showAiError("API key yok — uygulamadaki AI sekmesinden ekle")
+            return
+        }
+
+        tvAiError?.visibility = View.GONE
+        setAiLoading(true)
+
+        val requestId = ++aiRequestId
+        val ic = currentInputConnection
+        val selection = aiSelectedText
+
+        aiExecutor.execute {
+            val result = AiClient.requestCompletion(apiKey, prompt, selection)
+            aiHandler.post {
+                if (requestId != aiRequestId) return@post // panel kapandı / yeni istek başladı
+                setAiLoading(false)
+                when (result) {
+                    is AiClient.AiResult.Success -> {
+                        ic?.commitText(result.text, 1)
+                        isAiPromptMode = false
+                        aiPromptBuffer.clear()
+                        aiSelectedText = null
+                        aiPromptPanel?.visibility = View.GONE
+                        toolbarFrame?.visibility = View.VISIBLE
+                        updateSuggestions()
+                    }
+                    is AiClient.AiResult.Failure -> showAiError(result.message)
+                }
+            }
+        }
+    }
+
+    private fun setAiLoading(loading: Boolean) {
+        pbAiLoading?.visibility = if (loading) View.VISIBLE else View.GONE
+        btnAiSend?.isEnabled = !loading
+        btnAiCancel?.isEnabled = !loading
+        btnAiSend?.alpha = if (loading) 0.5f else 1f
+    }
+
+    private fun showAiError(message: String) {
+        tvAiError?.text = message
+        tvAiError?.visibility = View.VISIBLE
     }
 }

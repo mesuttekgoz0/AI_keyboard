@@ -1,6 +1,16 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+}
+
+// local.properties (gitignore'da) — geliştirme/test amaçlı yedek NVIDIA NIM API key'i.
+// Kullanıcı kendi key'ini uygulama içinden girmezse bu key'e düşülür.
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) FileInputStream(file).use { load(it) }
 }
 
 android {
@@ -15,6 +25,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val nimTestKey = localProperties.getProperty("NVIDIA_NIM_API_KEY", "").trim().trim('"')
+        buildConfigField("String", "NVIDIA_NIM_TEST_API_KEY", "\"$nimTestKey\"")
     }
 
     buildTypes {
@@ -38,6 +51,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

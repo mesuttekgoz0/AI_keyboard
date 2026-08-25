@@ -10,6 +10,7 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.fraunhofer.aikeyboard2.ai.ApiKeyProvider
 import com.fraunhofer.aikeyboard2.data.ShortcutRepository
 import com.fraunhofer.aikeyboard2.data.WordRepository
 import com.fraunhofer.aikeyboard2.filter.ProfanityFilter
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         setupFilterSection()
         setupShortcutSection()
         setupSettingsSection()
+        setupAiSection()
         updateStatus()
     }
 
@@ -85,6 +87,7 @@ class MainActivity : AppCompatActivity() {
         val tabs = listOf(
             R.id.tab_setup     to R.id.panel_setup,
             R.id.tab_settings  to R.id.panel_settings,
+            R.id.tab_ai        to R.id.panel_ai,
             R.id.tab_filter    to R.id.panel_filter,
             R.id.tab_shortcuts to R.id.panel_shortcuts
         )
@@ -217,6 +220,63 @@ class MainActivity : AppCompatActivity() {
             R.id.switch_key_vibration, "key_vibration_enabled", true,
             "Tuş Titreşimi Açık", "Tuş Titreşimi Kapalı"
         )
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // AI BÖLÜMÜ — kullanıcının kendi API key'i (bring your own key)
+    // ══════════════════════════════════════════════════════════════════
+
+    private fun setupAiSection() {
+        val etApiKey       = findViewById<EditText>(R.id.et_api_key)
+        val btnToggleShow  = findViewById<Button>(R.id.btn_toggle_key_visibility)
+        val btnSave        = findViewById<Button>(R.id.btn_save_api_key)
+        val btnClear       = findViewById<Button>(R.id.btn_clear_api_key)
+        val tvStatus       = findViewById<TextView>(R.id.tv_api_key_status)
+
+        etApiKey.setHintTextColor(0xFF4A4B50.toInt())
+        etApiKey.setText(ApiKeyProvider.getUserKey(this))
+
+        var isKeyVisible = false
+        fun applyVisibility() {
+            etApiKey.inputType = if (isKeyVisible)
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            else
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            etApiKey.setSelection(etApiKey.text.length)
+        }
+        applyVisibility()
+
+        btnToggleShow.setOnClickListener {
+            isKeyVisible = !isKeyVisible
+            applyVisibility()
+        }
+
+        fun refreshStatus() {
+            tvStatus.text = when {
+                ApiKeyProvider.isUsingOwnKey(this) -> "✓ Kendi API key'in kullanılıyor"
+                ApiKeyProvider.isUsingTestKey(this) -> "⚠️ Kendi key'in yok — geçici test key kullanılıyor"
+                else -> "✗ API key yok — AI özelliği çalışmayacak"
+            }
+        }
+        refreshStatus()
+
+        btnSave.setOnClickListener {
+            val key = etApiKey.text.toString().trim()
+            if (key.isEmpty()) {
+                Toast.makeText(this, "Boş key kaydedilemez, temizlemek için Temizle'yi kullan", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            ApiKeyProvider.setUserKey(this, key)
+            refreshStatus()
+            Toast.makeText(this, "API key kaydedildi ✓", Toast.LENGTH_SHORT).show()
+        }
+
+        btnClear.setOnClickListener {
+            ApiKeyProvider.clearUserKey(this)
+            etApiKey.text.clear()
+            refreshStatus()
+            Toast.makeText(this, "API key temizlendi", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════
